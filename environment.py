@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from climber import *
+import math
+
+ANGLE_CHANGE = math.radians(5)
 
 class environment:
-    def __init__(self, size = 50, holds = np.array(), agents = []):
+    def __init__(self, size = 50, holds = np.array([]), agents = []):
         self.size = size
         self.holds = holds
         self.agents = agents
@@ -18,7 +21,11 @@ class environment:
         self.size = size
 
     def step(self):
-        self.agents[0].move_left_hand(math.radians(90))
+        self.agents[0].torso.right_arm.grab(self.holds)
+        self.agents[0].lower_right_hand(ANGLE_CHANGE)
+        self.agents[0].lower_right_hand(ANGLE_CHANGE)
+        self.agents[0].lower_right_hand(ANGLE_CHANGE)
+        self.agents[0].lower_right_hand(ANGLE_CHANGE)
 
     def render(self, mode = "human"):
         print(self.holds)
@@ -30,16 +37,23 @@ class environment:
                 plt.plot(agent.torso.location[0], agent.torso.location[1], 'go')
                 plt.plot([agent.torso.location[0], agent.torso.left_arm.location[0]], [agent.torso.location[1], agent.torso.left_arm.location[1]], linestyle = 'solid')
                 plt.plot([agent.torso.location[0], agent.torso.right_arm.location[0]], [agent.torso.location[1], agent.torso.right_arm.location[1]], linestyle = 'solid')
-                plt.plot(agent.torso.left_arm.location[0], agent.torso.left_arm.location[1], 'blue')
-                plt.plot(agent.torso.right_arm.location[0], agent.torso.right_arm.location[1], 'blue')
+                plt.plot(agent.torso.left_arm.location[0], agent.torso.left_arm.location[1], 'bo')
+                plt.plot(agent.torso.right_arm.location[0], agent.torso.right_arm.location[1], 'yo')
+        
+        plt.xlim(0, self.size)
+        plt.ylim(0, self.size)
         plt.show()
 
 if __name__ == "__main__":
     env = environment(100, [], [])
-    env.set_size(10)
+    env.set_size(100)
     env.add_agent()
     env.add_hold(np.asarray((55, 50)))
-    env.add_hold(np.asarray((45, 50)))
     env.render()
+    print(env.agents[0].torso.right_arm.holding)
     env.step()
     env.render()
+    print(env.agents[0].torso.right_arm.holding)
+    env.step()
+    env.render()
+    print(env.agents[0].torso.right_arm.holding)
