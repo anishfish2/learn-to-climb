@@ -3,12 +3,12 @@ import numpy as np
 from climber import *
 
 class environment:
-    def __init__(self, size = 50, holds = [], agents = []):
+    def __init__(self, size = 50, holds = np.array(), agents = []):
         self.size = size
         self.holds = holds
         self.agents = agents
 
-    def add_agent(self, agent):
+    def add_agent(self):
         self.agents.append(climber())
 
     def add_hold(self, holds):
@@ -18,7 +18,7 @@ class environment:
         self.size = size
 
     def step(self):
-        pass
+        self.agents[0].move_left_hand(math.radians(90))
 
     def render(self, mode = "human"):
         print(self.holds)
@@ -27,19 +27,19 @@ class environment:
         
         if len(self.agents) > 0:
             for agent in self.agents:
-                print(agent.torso["location"])
-                print(agent.left_hand["location"])
-                print(agent.right_hand["location"])
-                plt.plot(agent.torso["location"][0], agent.torso["location"][1], 'go')
-                plt.plot([agent.torso["location"][0], agent.left_hand["location"][0]], [agent.torso["location"][1], agent.left_hand["location"][1]], linestyle = 'solid')
-                plt.plot([agent.torso["location"][0], agent.right_hand["location"][0]], [agent.torso["location"][1], agent.right_hand["location"][1]], linestyle = 'solid')
-                plt.plot(agent.left_hand["location"][0], agent.left_hand["location"][1], 'blue')
-                plt.plot(agent.right_hand["location"][0], agent.right_hand["location"][1], 'blue')
+                plt.plot(agent.torso.location[0], agent.torso.location[1], 'go')
+                plt.plot([agent.torso.location[0], agent.torso.left_arm.location[0]], [agent.torso.location[1], agent.torso.left_arm.location[1]], linestyle = 'solid')
+                plt.plot([agent.torso.location[0], agent.torso.right_arm.location[0]], [agent.torso.location[1], agent.torso.right_arm.location[1]], linestyle = 'solid')
+                plt.plot(agent.torso.left_arm.location[0], agent.torso.left_arm.location[1], 'blue')
+                plt.plot(agent.torso.right_arm.location[0], agent.torso.right_arm.location[1], 'blue')
         plt.show()
 
 if __name__ == "__main__":
     env = environment(100, [], [])
     env.set_size(10)
-    env.add_agent("agent1")
-    env.add_hold(np.asarray((100, 100)))
+    env.add_agent()
+    env.add_hold(np.asarray((55, 50)))
+    env.add_hold(np.asarray((45, 50)))
+    env.render()
+    env.step()
     env.render()
