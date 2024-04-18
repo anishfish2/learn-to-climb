@@ -52,6 +52,7 @@ class right_arm(body_part):
 class climber:
     def __init__(self, location = np.asarray((50, 50))):
         self.torso = torso(location)
+        self.energy = 500
 
     def raise_left_arm(self, angle, release = False):
         if not self.torso.left_arm.holding:
@@ -112,3 +113,15 @@ class climber:
                     self.torso.right_arm_angle += angle
                     self.torso.location = np.asarray((self.torso.right_arm.location[0] - LIMB_LENGTH * np.cos(self.torso.right_arm_angle), self.torso.right_arm.location[1] - LIMB_LENGTH * np.sin(self.torso.right_arm_angle)))
                     self.torso.left_arm.location = np.asarray((self.torso.location[0] - LIMB_LENGTH * np.cos(self.torso.left_arm.angle), self.torso.location[1] - LIMB_LENGTH * np.sin(self.torso.left_arm.angle)))
+
+    def grab_right_arm(self, holds):
+        self.torso.right_arm.grab(holds)
+    
+    def grab_left_arm(self, holds):
+        self.torso.left_arm.grab(holds)
+
+    def release_right_arm(self):
+        self.torso.right_arm.release()
+
+    def release_left_arm(self):
+        self.torso.left_arm.release()
