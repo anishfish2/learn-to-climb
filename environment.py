@@ -21,11 +21,14 @@ class environment:
         self.size = size
 
     def step(self):
-        self.agents[0].torso.right_arm.grab(self.holds)
-        self.agents[0].lower_right_hand(ANGLE_CHANGE)
-        self.agents[0].lower_right_hand(ANGLE_CHANGE)
-        self.agents[0].lower_right_hand(ANGLE_CHANGE)
-        self.agents[0].lower_right_hand(ANGLE_CHANGE)
+        self.agents[0].torso.left_arm.grab(self.holds)
+        self.agents[0].raise_left_arm(ANGLE_CHANGE)
+        self.agents[0].raise_left_arm(ANGLE_CHANGE)
+        self.agents[0].raise_left_arm(ANGLE_CHANGE)
+        self.agents[0].raise_left_arm(ANGLE_CHANGE)
+
+
+
 
     def render(self, mode = "human"):
         print(self.holds)
@@ -49,11 +52,13 @@ if __name__ == "__main__":
     env.set_size(100)
     env.add_agent()
     env.add_hold(np.asarray((55, 50)))
-    env.render()
+    env.add_hold(np.asarray((60, 50)))
+    env.add_hold(np.asarray((45, 50)))
     print(env.agents[0].torso.right_arm.holding)
+    env.render()
     env.step()
-    env.render()
     print(env.agents[0].torso.right_arm.holding)
+    env.render()
     env.step()
-    env.render()
     print(env.agents[0].torso.right_arm.holding)
+    env.render()
