@@ -1,9 +1,17 @@
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.animation import FuncAnimation
+from PIL import Image
 import numpy as np
 from climber import *
 import math
 import gym
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+
 is_ipython = 'inline' in matplotlib.get_backend()
 if is_ipython:
     from IPython import display
@@ -77,15 +85,72 @@ class environment(gym.Env):
         plt.ylim(0, self.size)
         plt.show()
 
-    def render_run(self, show_result = False):
-        plt.pause(0.001)  # pause a bit so that plots are updated
-        if is_ipython:
-            if not show_result:
-                display.display(plt.gcf())
-                display.clear_output(wait=True)
-            else:
-                display.display(plt.gcf())
-    
+    def render_run(self, save = False, show_result = False):
+        if not save:
+            plt.figure(2)
+            if len(self.holds) > 0:
+                plt.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
+
+            plt.plot(self.agent.torso.location[0], self.agent.torso.location[1], 'go')
+            plt.plot([self.agent.torso.location[0], self.agent.torso.left_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.left_arm.location[1]], linestyle = 'solid')
+            plt.plot([self.agent.torso.location[0], self.agent.torso.right_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.right_arm.location[1]], linestyle = 'solid')
+            plt.plot(self.agent.torso.left_arm.location[0], self.agent.torso.left_arm.location[1], 'bo')
+            plt.plot(self.agent.torso.right_arm.location[0], self.agent.torso.right_arm.location[1], 'yo')
+        
+            plt.xlim(0, self.size)
+            plt.ylim(0, self.size)
+
+            plt.pause(0.00001)  # pause a bit so that plots are updated
+            if is_ipython:
+                if not show_result:
+                    display.display(plt.gcf())
+                    display.clear_output(wait=True)
+                else:
+                    display.display(plt.gcf())
+            plt.clf()
+
+        if save:
+            # Initialize the figure and axes
+            fig, ax = plt.subplots()
+
+            # Initialize an empty list to store frames
+            frames = []
+
+            NUM_FRAMES = 120  # Define the number of frames
+
+            def animate(i):
+                plt.figure(2)
+                plt.clf()
+                if len(self.holds) > 0:
+                    plt.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
+
+                plt.plot(self.agent.torso.location[0], self.agent.torso.location[1], 'go')
+                plt.plot([self.agent.torso.location[0], self.agent.torso.left_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.left_arm.location[1]], linestyle='solid')
+                plt.plot([self.agent.torso.location[0], self.agent.torso.right_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.right_arm.location[1]], linestyle='solid')
+                plt.plot(self.agent.torso.left_arm.location[0], self.agent.torso.left_arm.location[1], 'bo')
+                plt.plot(self.agent.torso.right_arm.location[0], self.agent.torso.right_arm.location[1], 'yo')
+
+                plt.xlim(0, self.size)
+                plt.ylim(0, self.size)
+
+                plt.pause(0.00001)  # pause a bit so that plots are updated
+
+                # Save the current figure as an image
+                filename = f'frame_{i:04d}.png'
+                plt.savefig(filename)
+                frames.append(filename)
+
+            # Create the animation
+            ani = FuncAnimation(fig, animate, frames=range(NUM_FRAMES), interval=50)
+
+            # Ensure frames are generated before attempting to save
+            for i in range(NUM_FRAMES):
+                animate(i)
+
+            # Save the list of frame filenames as a GIF
+            with Image.open(frames[0]) as img:
+                img.save('animation.gif', save_all=True, append_images=[Image.open(frame) for frame in frames[1:]], duration=50, loop=0)
+
     def get_observation(self):
         return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
 

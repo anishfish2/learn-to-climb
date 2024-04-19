@@ -7,6 +7,8 @@ from itertools import count
 import math
 import random
 import matplotlib
+from matplotlib.animation import FuncAnimation
+from PIL import Image
 
 import torch
 import torch.nn as nn
@@ -128,8 +130,8 @@ def plot_rewards(show_result=False):
         else:
             display.display(plt.gcf())
 
-def plot_state(show_result = False):
-    env.render_run(show_result)
+def plot_state(save = False, show_result = False):
+    env.render_run(save, show_result)
 
 
 def optimize_model():
@@ -164,7 +166,7 @@ def optimize_model():
 if torch.cuda.is_available():
     num_episodes = 600
 else:
-    num_episodes = 600
+    num_episodes = 1
 
 for i_episode in range(num_episodes):
     print("Episode: ", i_episode)
@@ -193,13 +195,15 @@ for i_episode in range(num_episodes):
             target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
         target_net.load_state_dict(target_net_state_dict)
 
-        plot_state()
+        
 
         if done:
             reward_tracking.append(reward)
             plot_rewards()
-            
             break
+
+    if i_episode == num_episodes - 1:
+            plot_state(save = True, show_result = True)
 
 print('Complete')
 plot_rewards(show_result=True)
