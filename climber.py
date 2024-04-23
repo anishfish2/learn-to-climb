@@ -49,7 +49,7 @@ class right_arm(body_part):
 class climber:
     def __init__(self, location = np.asarray((50, 50))):
         self.torso = torso(location)
-        self.energy = 500
+        self.energy = 1000
 
     def raise_left_arm(self, angle):
         if not self.torso.left_arm.holding:

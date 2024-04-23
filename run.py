@@ -26,10 +26,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 128
 GAMMA = 0.99
 EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 1000
+EPS_END = 0.01
+EPS_DECAY = 2000
 TAU = 0.005
-LR = 1e-4
+LR = 1e-3
 
 
 
@@ -41,12 +41,14 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
         self.layer1 = nn.Linear(n_observations, 128)
         self.layer2 = nn.Linear(128, 128)
-        self.layer3 = nn.Linear(128, n_actions)
+        self.layer3 = nn.Linear(128, 128)
+        self.layer4 = nn.Linear(128, n_actions)
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
-        return self.layer3(x)
+        x = F.relu(self.layer3(x))
+        return self.layer4(x)
 
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward'))
@@ -166,7 +168,7 @@ def optimize_model():
 if torch.cuda.is_available():
     num_episodes = 600
 else:
-    num_episodes = 10
+    num_episodes = 2000
 
 for i_episode in range(num_episodes):
     print("Episode: ", i_episode)
@@ -205,7 +207,7 @@ for i_episode in range(num_episodes):
             plot_state(save = False, show_result = False)
     if i_episode == num_episodes - 1:
             plot_state(save = False, show_result = True)
-            
+
 print('Complete')
 plot_rewards(show_result=True)
 plt.ioff()

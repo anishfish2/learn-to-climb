@@ -59,8 +59,9 @@ class environment(gym.Env):
             self.agent.release_right_arm()
 
         new_torso_location = self.agent.torso.location
-
-        reward = (new_torso_location[0] + new_torso_location[1]) ** 2
+        new_distance = math.hypot(self.size - new_torso_location[0], self.size - new_torso_location[1])
+        previous_distance = math.hypot(self.size - previous_torso_location[0], self.size - previous_torso_location[1])
+        reward = 100 * int(new_distance < previous_distance) - new_distance
 
         self.agent.energy -= np.linalg.norm(new_torso_location - previous_torso_location)
         self.agent.energy -= 1
@@ -86,6 +87,7 @@ class environment(gym.Env):
         plt.show()
 
     def render_run(self, save = False, show_result = False):
+        plt.clf()
         plt.figure(2)
 
         if len(self.holds) > 0:
@@ -100,14 +102,14 @@ class environment(gym.Env):
         plt.xlim(0, self.size)
         plt.ylim(0, self.size)
 
-        plt.pause(0.0001)  # pause a bit so that plots are updated
+        plt.pause(0.001)  # pause a bit so that plots are updated
         if is_ipython:
             if not show_result:
                 display.display(plt.gcf())
                 display.clear_output(wait=True)
             else:
                 display.display(plt.gcf())
-        plt.clf()
+        
 
     def get_observation(self):
         return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
