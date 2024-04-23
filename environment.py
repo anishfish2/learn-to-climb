@@ -166,6 +166,8 @@ class environment(gym.Env):
             ani.save(filename=_vid_name, writer="pillow")
         
     def get_observation(self):
+        #New observation system
+
         return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ import sys
 import os
 import shutil
 import argparse
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -72,13 +73,13 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
 
     env = environment(size, [], 'saves/' + filename)
 
-    for i in range(97):
+    for i in range(90):
         env.add_hold(np.asarray((55, 50)))
         env.add_hold(np.asarray((45, 50)))
         env.add_hold(np.asarray((i, i)))
-        env.add_hold(np.asarray((i+3, i+3)))
-        env.add_hold(np.asarray((i+3, i)))
-        env.add_hold(np.asarray((i, i+3)))
+        env.add_hold(np.asarray((i+10, i+10)))
+        env.add_hold(np.asarray((i+10, i)))
+        env.add_hold(np.asarray((i, i+10)))
 
 
     state = env.reset()
@@ -173,7 +174,7 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
     else:
         num_episodes = episodes
 
-    for i_episode in range(num_episodes):
+    for i_episode in tqdm(range(num_episodes)):
         if not verbose:
             print("Episode: ", i_episode)
         state = env.reset()
