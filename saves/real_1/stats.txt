@@ -1,0 +1,4 @@
+Filename: real_1
+Episodes: 500
+Size: 100
+Agent Energy: True

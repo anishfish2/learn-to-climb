@@ -8,6 +8,7 @@ LIMB_LENGTH = 5
 class body_part:
     def __init__(self, location = np.asarray((0, 0)), angle = 0):
         self.location = location
+        self.location_tracking = []
         self.angle = angle
 
 class torso(body_part):
@@ -47,9 +48,13 @@ class right_arm(body_part):
         
 
 class climber:
-    def __init__(self, location = np.asarray((50, 50))):
+    def __init__(self, location = np.asarray((50, 50)), agent_energy = 500):
         self.torso = torso(location)
-        self.energy = 1000
+        self.energy = agent_energy
+        self.current_reward = 0
+        self.location_tracking = []
+        self.reward_tracking = []
+        self.distance_to_goal = math.hypot(location[0] - self.torso.location[0], location[1] - self.torso.location[1])
 
     def raise_left_arm(self, angle):
         if not self.torso.left_arm.holding:
