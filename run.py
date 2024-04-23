@@ -237,10 +237,19 @@ if __name__ == "__main__":
 
     steps_done = 0
 
-    run(filename, episodes, size, verbose, agent_energy)
+    if not os.path.exists('saves/' + filename):
+        os.makedirs('saves/' + filename)
+    else:
+        shutil.rmtree('saves/' + filename)
+        os.makedirs('saves/' + filename)
+    
     f = open('saves/' + filename + "/stats.txt","w+")
     f.write("Filename: " + filename + "\n")
     f.write("Episodes: " + str(episodes) + "\n")
     f.write("Size: " + str(size) + "\n")
     f.write("Agent Energy: " + str(agent_energy) + "\n")
     f.close()
+
+    run(filename, episodes, size, verbose, agent_energy)
+
+    

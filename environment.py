@@ -55,7 +55,7 @@ class environment(gym.Env):
         elif action == 2:
             self.agent.raise_right_arm(ANGLE_CHANGE)
         elif action == 3:
-            self.agent.lower_right_arm(-ANGLE_CHANGE)
+            self.agent.lower_right_arm(ANGLE_CHANGE)
         elif action == 4:
             self.agent.grab_left_arm(self.holds)
         elif action == 5:
@@ -71,7 +71,7 @@ class environment(gym.Env):
 
         reward = previous_distance - new_distance 
         self.agent.distance_to_goal = new_distance
-        
+
         self.agent.current_reward = reward
 
         self.agent.energy -= np.linalg.norm(new_torso_location - previous_torso_location)
