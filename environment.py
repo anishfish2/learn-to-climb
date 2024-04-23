@@ -98,6 +98,8 @@ class environment(gym.Env):
             self.ax.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
 
         self.ax.plot(self.agent.torso.location_tracking[i][0], self.agent.torso.location_tracking[i][1], 'go')
+        radius_circle = matplotlib.patches.Circle((self.agent.torso.location_tracking[i][0], self.agent.torso.location_tracking[i][1]), self.agent.observation_radius, fill=False, color='blue')
+        self.ax.add_patch(radius_circle)     
         self.ax.plot([self.agent.torso.location_tracking[i][0], self.agent.torso.left_arm.location_tracking[i][0]], [self.agent.torso.location_tracking[i][1], self.agent.torso.left_arm.location_tracking[i][1]], linestyle = 'solid')
         self.ax.plot([self.agent.torso.location_tracking[i][0], self.agent.torso.right_arm.location_tracking[i][0]], [self.agent.torso.location_tracking[i][1], self.agent.torso.right_arm.location_tracking[i][1]], linestyle = 'solid')
         self.ax.plot(self.agent.torso.left_arm.location_tracking[i][0], self.agent.torso.left_arm.location_tracking[i][1], 'bo')
@@ -115,6 +117,7 @@ class environment(gym.Env):
             plt.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
 
         plt.plot(self.agent.torso.location[0], self.agent.torso.location[1], 'go')
+        plt.Circle((self.agent.torso.location[0], self.agent.torso.location[1]), self.agent.observation_radius, fill=False, color='blue')
         plt.plot([self.agent.torso.location[0], self.agent.torso.left_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.left_arm.location[1]], linestyle = 'solid')
         plt.plot([self.agent.torso.location[0], self.agent.torso.right_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.right_arm.location[1]], linestyle = 'solid')
         plt.plot(self.agent.torso.left_arm.location[0], self.agent.torso.left_arm.location[1], 'bo')
@@ -132,11 +135,14 @@ class environment(gym.Env):
             plt.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
 
         plt.plot(self.agent.torso.location[0], self.agent.torso.location[1], 'go')
+        plt.Circle((self.agent.torso.location[0], self.agent.torso.location[1]), self.agent.observation_radius, fill=False, color='blue')
         plt.plot([self.agent.torso.location[0], self.agent.torso.left_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.left_arm.location[1]], linestyle = 'solid')
         plt.plot([self.agent.torso.location[0], self.agent.torso.right_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.right_arm.location[1]], linestyle = 'solid')
         plt.plot(self.agent.torso.left_arm.location[0], self.agent.torso.left_arm.location[1], 'bo')
         plt.plot(self.agent.torso.right_arm.location[0], self.agent.torso.right_arm.location[1], 'yo')
-    
+
+        
+
         plt.xlim(0, self.size)
         plt.ylim(0, self.size)
 
@@ -166,9 +172,22 @@ class environment(gym.Env):
             ani.save(filename=_vid_name, writer="pillow")
         
     def get_observation(self):
-        #New observation system
 
-        return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
+        sensor_array = np.array([0] * 8)
+
+        for i, obj in enumerate(self.holds):
+            hold_x, hold_y = obj
+
+            angle_diff = math.atan2(hold_y - self.agent.torso.location[1], hold_x - self.agent.torso.location[0])
+
+            distance =  math.hypot(hold_x - self.agent.torso.location[0], hold_y - self.agent.torso.location[1])
+
+            if distance <= self.agent.observation_radius:
+                sensor_index = int(angle_diff // (math.pi / 4))
+                if sensor_array[sensor_index] == 0 or distance < sensor_array[sensor_index]:
+                    sensor_array[sensor_index] = distance
+
+        return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
 
 if __name__ == "__main__":
     env = environment(100, [], "testing_environment/")
