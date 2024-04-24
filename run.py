@@ -20,13 +20,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-BATCH_SIZE = 64  
-GAMMA = 0.6
-EPS_START = 0.8 
-EPS_END = 0.05 
-EPS_DECAY = 1000  
-TAU = 0.001  
-LR = 5e-4 
+BATCH_SIZE = 128
+GAMMA = 0.99
+EPS_START = 0.9
+EPS_END = 0.01
+EPS_DECAY = 2000
+TAU = 0.005
+LR = 1e-4
 
 
 def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_energy = 500):
@@ -44,13 +44,11 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
             super(DQN, self).__init__()
             self.layer1 = nn.Linear(n_observations, 128)
             self.layer2 = nn.Linear(128, 128)
-            self.layer3 = nn.Linear(128, 128)
             self.layer4 = nn.Linear(128, n_actions)
 
         def forward(self, x):
             x = F.relu(self.layer1(x))
             x = F.relu(self.layer2(x))
-            x = F.relu(self.layer3(x))
             return self.layer4(x)
 
     Transition = namedtuple('Transition',
@@ -74,7 +72,7 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
 
     env = environment(size, [], 'saves/' + filename)
 
-    for i in range(90):
+    for i in range(0, 90, 5):
         env.add_hold(np.asarray((55, 50)))
         env.add_hold(np.asarray((45, 50)))
         env.add_hold(np.asarray((i, i)))
@@ -87,7 +85,7 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
     env.render()
     n_actions = env.action_space.n
     n_observations = len(state)
-
+    print(n_actions, n_observations)
     policy_net = DQN(n_observations, n_actions).to(device)
     target_net = DQN(n_observations, n_actions).to(device)
     target_net.load_state_dict(policy_net.state_dict())
@@ -205,17 +203,17 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
 
 
             if done:
-                reward_tracking.append(env.agent.distance_to_goal)
-                #reward_tracking.append(reward)
+                #reward_tracking.append(env.agent.distance_to_goal)
+                reward_tracking.append(reward)
                 if not verbose:
                     plot_rewards()
                 break
+
             if not verbose:
                 if i_episode == num_episodes - 1:
                     plot_state(False, False)
                 
-        if i_episode == num_episodes - 1:
-                plot_state(True, True)
+    plot_state(True, True)
 
     print('Complete')
     plot_rewards(show_result=True)

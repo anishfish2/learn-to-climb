@@ -29,6 +29,8 @@ class environment(gym.Env):
         self.animation_step = 0
         self.num_step = 0
         self.save_path = save_path
+        self.observation_tracking = []
+        self.holding_tracking = []
 
     def reset_agent(self):
         self.agent = climber(agent_energy = self.agent_starting_energy)
@@ -47,7 +49,7 @@ class environment(gym.Env):
 
     def step(self, action):
         previous_torso_location = self.agent.torso.location
-
+    
         if action == 0:
             self.agent.raise_left_arm(ANGLE_CHANGE)
         elif action == 1:
@@ -69,30 +71,36 @@ class environment(gym.Env):
         new_distance = math.hypot(self.size - new_torso_location[0], self.size - new_torso_location[1])
         previous_distance = math.hypot(self.size - previous_torso_location[0], self.size - previous_torso_location[1])
 
-        reward = previous_distance - new_distance 
+        #reward = 1 if previous_distance - new_distance > 0 else 0
+        reward = previous_distance - new_distance
         self.agent.distance_to_goal = new_distance
 
         self.agent.current_reward = reward
 
-        self.agent.energy -= np.linalg.norm(new_torso_location - previous_torso_location)
+        #self.agent.energy -= np.linalg.norm(new_torso_location - previous_torso_location)
         self.agent.energy -= 1
 
         done = False
         if (self.agent.torso.location[0] == self.size and self.agent.torso.location[1] == self.size) or self.agent.energy <= 0:
             done = True 
 
+        observation = self.get_observation()
+
         self.agent.torso.location_tracking.append(self.agent.torso.location)
         self.agent.torso.left_arm.location_tracking.append(self.agent.torso.left_arm.location)
         self.agent.torso.right_arm.location_tracking.append(self.agent.torso.right_arm.location)
         self.agent.reward_tracking.append(reward)
-        
+        self.observation_tracking.append(observation)
+        self.holding_tracking.append((self.agent.torso.left_arm.holding, self.agent.torso.right_arm.holding))
+
         self.num_step += 1
-        return self.get_observation(), reward, done, None, None
+
+        return observation, reward, done, None, None
     
     def update_anim(self, frame):
         self.ax.clear()
         i = self.animation_step % self.num_step
-        self.ax.set_title((f"Step {i}, Reward {round(self.agent.reward_tracking[i], 4)}  "))
+        self.ax.set_title((f"Step {i}, Reward {round(self.agent.reward_tracking[i], 4)}, Left {self.holding_tracking[i][0]}, Right {self.holding_tracking[i][1]}"))
 
         if len(self.holds) > 0:
             self.ax.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
@@ -106,7 +114,6 @@ class environment(gym.Env):
         self.ax.plot(self.agent.torso.right_arm.location_tracking[i][0], self.agent.torso.right_arm.location_tracking[i][1], 'yo')
         
         self.animation_step += 1
-
         x1 = [0, self.size, self.size, 0, 0]
         y1 = [0, 0, self.size, self.size, 0]
         self.ax.plot(x1, y1, color='black')
@@ -184,8 +191,10 @@ class environment(gym.Env):
 
             if distance <= self.agent.observation_radius:
                 sensor_index = int(angle_diff // (math.pi / 4))
+
                 # if sensor_array[sensor_index] == 0 or distance < sensor_array[sensor_index]:
                 #     sensor_array[sensor_index] = distance
+
                 sensor_array[sensor_index] += 1
 
         return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
