@@ -1,4 +1,4 @@
 Filename: testing
-Episodes: 5
+Episodes: 1
 Size: 100
 Agent Energy: True

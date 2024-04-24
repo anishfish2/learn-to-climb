@@ -184,8 +184,9 @@ class environment(gym.Env):
 
             if distance <= self.agent.observation_radius:
                 sensor_index = int(angle_diff // (math.pi / 4))
-                if sensor_array[sensor_index] == 0 or distance < sensor_array[sensor_index]:
-                    sensor_array[sensor_index] = distance
+                # if sensor_array[sensor_index] == 0 or distance < sensor_array[sensor_index]:
+                #     sensor_array[sensor_index] = distance
+                sensor_array[sensor_index] += 1
 
         return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
 

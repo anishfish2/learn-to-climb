@@ -20,13 +20,14 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-BATCH_SIZE = 128
-GAMMA = 0.99
-EPS_START = 0.9
-EPS_END = 0.01
-EPS_DECAY = 2000
-TAU = 0.005
-LR = 1e-3
+BATCH_SIZE = 64  
+GAMMA = 0.6
+EPS_START = 0.8 
+EPS_END = 0.05 
+EPS_DECAY = 1000  
+TAU = 0.001  
+LR = 5e-4 
+
 
 def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_energy = 500):
 
