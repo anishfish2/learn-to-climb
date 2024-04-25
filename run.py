@@ -70,12 +70,12 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
             return len(self.memory)
 
 
-    env = environment(size, [], 'saves/' + filename)
+    env = environment(size, [], 'saves/' + filename, agent_energy)
 
     for i in range(0, 96, 3):
-        env.add_hold(np.asarray((i+4, i+4)))
-        env.add_hold(np.asarray((i+4, i)))
-        env.add_hold(np.asarray((i, i+4)))
+        env.add_hold(np.asarray((i, i)))
+        # env.add_hold(np.asarray((i+4, i)))
+        # env.add_hold(np.asarray((i, i+4)))
 
 
     state = env.reset()
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     parser.add_argument('-e', type=int, default=5, help='number of episodes')
     parser.add_argument('-s', type=int, default=100, help='size of the environment')
     parser.add_argument('-v', type=bool, default=False, help='verbose')
-    parser.add_argument('-ae', type=bool, default=False, help='agent energy')
+    parser.add_argument('-ae', type=int, default=500, help='agent starting energy')
 
     args = parser.parse_args()
     filename = args.f
@@ -244,6 +244,7 @@ if __name__ == "__main__":
     f.write("Episodes: " + str(episodes) + "\n")
     f.write("Size: " + str(size) + "\n")
     f.write("Agent Energy: " + str(agent_energy) + "\n")
+
     f.close()
 
     run(filename, episodes, size, verbose, agent_energy)
