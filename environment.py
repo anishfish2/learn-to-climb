@@ -7,6 +7,7 @@ from climber import *
 import math
 import gym
 import os
+import pandas as pd
 
 import torch
 import torch.nn as nn
@@ -32,6 +33,7 @@ class environment(gym.Env):
         self.observation_tracking = []
         self.holding_tracking = []
         self.action_tracking = []
+        self.reward_tracking = []
 
     def reset_agent(self):
         self.agent = climber(agent_energy = self.agent_starting_energy)
@@ -46,11 +48,13 @@ class environment(gym.Env):
         self.reset_agent()
         self.num_step = 0
         self.animation_step = 0
+        self.observation_tracking = []
+        self.holding_tracking = []
+        self.action_tracking = []
         return self.get_observation()
 
     def step(self, action):
         previous_torso_location = self.agent.torso.location
-    
         if action == 0:
             self.agent.raise_left_arm(ANGLE_CHANGE)
             self.action_tracking.append("Raise Left Arm")
@@ -105,7 +109,7 @@ class environment(gym.Env):
         self.agent.torso.location_tracking.append(self.agent.torso.location)
         self.agent.torso.left_arm.location_tracking.append(self.agent.torso.left_arm.location)
         self.agent.torso.right_arm.location_tracking.append(self.agent.torso.right_arm.location)
-        self.agent.reward_tracking.append(reward)
+        self.reward_tracking.append(reward)
         self.observation_tracking.append(observation)
         self.holding_tracking.append((self.agent.torso.left_arm.holding, self.agent.torso.right_arm.holding))
 
@@ -116,7 +120,7 @@ class environment(gym.Env):
     def update_anim(self, frame):
         self.ax.clear()
         i = self.animation_step % self.num_step
-        self.ax.set_title((f"Step {i}, Reward {round(self.agent.reward_tracking[i], 4)}, Left {self.holding_tracking[i][0]}, Right {self.holding_tracking[i][1]}, Action {self.action_tracking[i]}"))
+        self.ax.set_title((f"Step {i}, Reward {round(self.reward_tracking[i], 4)}, Left {self.holding_tracking[i][0]}, Right {self.holding_tracking[i][1]}, Action {self.action_tracking[i]}"))
 
         if len(self.holds) > 0:
             self.ax.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
@@ -180,6 +184,18 @@ class environment(gym.Env):
                 display.display(plt.gcf())
 
         if save:
+            csv_dict = {}
+
+            # csv_dict["Location X"] = [i[0] for i in self.agent.torso.location_tracking]
+            # csv_dict["Location Y"] = [i[1] for i in self.agent.torso.location_tracking]
+            csv_dict["Left Arm Location X"] = [i[0] for i in self.agent.torso.left_arm.location_tracking]
+            csv_dict["Left Arm Location Y"] = [i[1] for i in self.agent.torso.left_arm.location_tracking]
+            csv_dict["Right Arm Location X"] = [i[0] for i in self.agent.torso.right_arm.location_tracking]
+            csv_dict["Right Arm Location Y"] = [i[1] for i in self.agent.torso.right_arm.location_tracking]
+            csv_dict["Holding Left"] = [i[0] for i in self.holding_tracking]
+            csv_dict["Holding Right"] = [i[1] for i in self.holding_tracking]          
+            csv_dict["Action"] = self.action_tracking
+            
             self.fig, self.ax = plt.subplots()
             self.ax.set_xlim(0, self.size)
             self.ax.set_ylim(0, self.size)
@@ -191,8 +207,14 @@ class environment(gym.Env):
             self.ax.plot(x1, y1, color='black')
             real_num = self.num_step
             ani = animation.FuncAnimation(self.fig, self.update_anim, frames=real_num, interval=500, blit=False, repeat=True)
-            _vid_name = os.path.join(self.save_path + '/', 'vid.webp')
+            _vid_name = os.path.join(self.save_path + '/', 'vid.gif')
             ani.save(filename=_vid_name, writer="pillow")
+            
+            
+
+            df = pd.DataFrame(csv_dict)
+            df.to_csv(self.save_path + '/data.csv')
+
         
     def get_observation(self):
 

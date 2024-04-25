@@ -14,10 +14,10 @@ class body_part:
 class torso(body_part):
     def __init__(self, location = np.asarray((0, 0)), angle = 0):
         super().__init__(location, angle)
-        self.right_arm = right_arm(location + np.asarray((5, 0)), angle = 0)
-        self.left_arm = left_arm(location + np.asarray((-5, 0)), angle = math.radians(180))
+        self.right_arm = arm(location + np.asarray((5, 0)), angle = 0)
+        self.left_arm = arm(location + np.asarray((-5, 0)), angle = math.radians(180))
 
-class left_arm(body_part):
+class arm(body_part):
     def __init__(self, location = np.asarray((0, 0)), angle = 0):
         super().__init__(location, angle)
         self.holding = False
@@ -28,24 +28,8 @@ class left_arm(body_part):
     
     def grab(self, holds = []):
         for hold in holds:
-            if np.linalg.norm(self.location - hold) < 5:
+            if np.linalg.norm(self.location - hold) < 1:
                 self.holding = True
-
-
-class right_arm(body_part):
-    def __init__(self, location = np.asarray((0, 0)), angle = 0):
-        super().__init__(location, angle)
-        self.holding = False
-        self.angle = angle
-
-    def release(self):
-        self.holding = False
-    
-    def grab(self, holds):
-        for hold in holds:
-            if np.linalg.norm(self.location - hold) < 5:
-                self.holding = True
-        
 
 class climber:
     def __init__(self, location = np.asarray((50, 50)), agent_energy = 500):
@@ -53,7 +37,7 @@ class climber:
         self.energy = agent_energy
         self.current_reward = 0
         self.location_tracking = []
-        self.reward_tracking = []
+        
         self.observation_radius = 10
         self.distance_to_goal = math.hypot(location[0] - self.torso.location[0], location[1] - self.torso.location[1])
 
