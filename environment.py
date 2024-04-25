@@ -206,7 +206,7 @@ class environment(gym.Env):
             y1 = [0, 0, self.size, self.size, 0]
             self.ax.plot(x1, y1, color='black')
             real_num = self.num_step
-            ani = animation.FuncAnimation(self.fig, self.update_anim, frames=real_num, interval=500, blit=False, repeat=True)
+            ani = animation.FuncAnimation(self.fig, self.update_anim, frames=real_num, interval=50, blit=False, repeat=True)
             _vid_name = os.path.join(self.save_path + '/', 'vid.gif')
             ani.save(filename=_vid_name, writer="pillow")
             
@@ -235,7 +235,8 @@ class environment(gym.Env):
 
                 sensor_array[sensor_index] += 1
 
-        return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
+        #return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
+        return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
 
 if __name__ == "__main__":
     env = environment(100, [], "testing_environment/")
