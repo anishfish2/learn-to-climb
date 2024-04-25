@@ -97,7 +97,8 @@ class environment(gym.Env):
 
         self.agent.current_reward = reward
 
-        #self.agent.energy -= np.linalg.norm(new_torso_location - previous_torso_location)
+        if np.linalg.norm(new_torso_location - previous_torso_location) == 0: 
+            self.agent.energy -= 1
         self.agent.energy -= 1
 
         done = False
@@ -235,8 +236,8 @@ class environment(gym.Env):
 
                 sensor_array[sensor_index] += 1
 
-        #return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
-        return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
+        return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
+        # return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
 
 if __name__ == "__main__":
     env = environment(100, [], "testing_environment/")

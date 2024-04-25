@@ -72,13 +72,10 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
 
     env = environment(size, [], 'saves/' + filename)
 
-    for i in range(0, 90, 5):
-        env.add_hold(np.asarray((55, 50)))
-        env.add_hold(np.asarray((45, 50)))
-        env.add_hold(np.asarray((i, i)))
-        env.add_hold(np.asarray((i+10, i+10)))
-        env.add_hold(np.asarray((i+10, i)))
-        env.add_hold(np.asarray((i, i+10)))
+    for i in range(0, 96, 3):
+        env.add_hold(np.asarray((i+4, i+4)))
+        env.add_hold(np.asarray((i+4, i)))
+        env.add_hold(np.asarray((i, i+4)))
 
 
     state = env.reset()
