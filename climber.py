@@ -28,7 +28,7 @@ class left_arm(body_part):
     
     def grab(self, holds = []):
         for hold in holds:
-            if np.linalg.norm(self.location - hold) < 1:
+            if np.linalg.norm(self.location - hold) < 5:
                 self.holding = True
 
 
@@ -43,7 +43,7 @@ class right_arm(body_part):
     
     def grab(self, holds):
         for hold in holds:
-            if np.linalg.norm(self.location - hold) < 1:
+            if np.linalg.norm(self.location - hold) < 5:
                 self.holding = True
         
 

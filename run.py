@@ -85,7 +85,6 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
     env.render()
     n_actions = env.action_space.n
     n_observations = len(state)
-    print(n_actions, n_observations)
     policy_net = DQN(n_observations, n_actions).to(device)
     target_net = DQN(n_observations, n_actions).to(device)
     target_net.load_state_dict(policy_net.state_dict())

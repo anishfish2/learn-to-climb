@@ -31,6 +31,7 @@ class environment(gym.Env):
         self.save_path = save_path
         self.observation_tracking = []
         self.holding_tracking = []
+        self.action_tracking = []
 
     def reset_agent(self):
         self.agent = climber(agent_energy = self.agent_starting_energy)
@@ -52,20 +53,35 @@ class environment(gym.Env):
     
         if action == 0:
             self.agent.raise_left_arm(ANGLE_CHANGE)
+            self.action_tracking.append("Raise Left Arm")
+
         elif action == 1:
             self.agent.lower_left_arm(ANGLE_CHANGE)
+            self.action_tracking.append("Lower Left Arm")
+
         elif action == 2:
             self.agent.raise_right_arm(ANGLE_CHANGE)
+            self.action_tracking.append("Raise Right Arm")
+
         elif action == 3:
             self.agent.lower_right_arm(ANGLE_CHANGE)
+            self.action_tracking.append("Lower Right Arm")
+
         elif action == 4:
             self.agent.grab_left_arm(self.holds)
+            self.action_tracking.append("Grab Left Arm")
+
         elif action == 5:
             self.agent.grab_right_arm(self.holds)
+            self.action_tracking.append("Grab Right Arm")
+
         elif action == 6:
             self.agent.release_left_arm()
+            self.action_tracking.append("Release Left Arm")
+
         elif action == 7:
             self.agent.release_right_arm()
+            self.action_tracking.append("Release Right Arm")
 
         new_torso_location = self.agent.torso.location
         new_distance = math.hypot(self.size - new_torso_location[0], self.size - new_torso_location[1])
@@ -100,7 +116,7 @@ class environment(gym.Env):
     def update_anim(self, frame):
         self.ax.clear()
         i = self.animation_step % self.num_step
-        self.ax.set_title((f"Step {i}, Reward {round(self.agent.reward_tracking[i], 4)}, Left {self.holding_tracking[i][0]}, Right {self.holding_tracking[i][1]}"))
+        self.ax.set_title((f"Step {i}, Reward {round(self.agent.reward_tracking[i], 4)}, Left {self.holding_tracking[i][0]}, Right {self.holding_tracking[i][1]}, Action {self.action_tracking[i]}"))
 
         if len(self.holds) > 0:
             self.ax.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
@@ -174,7 +190,7 @@ class environment(gym.Env):
             y1 = [0, 0, self.size, self.size, 0]
             self.ax.plot(x1, y1, color='black')
             real_num = self.num_step
-            ani = animation.FuncAnimation(self.fig, self.update_anim, frames=real_num, interval=100, blit=False, repeat=True)
+            ani = animation.FuncAnimation(self.fig, self.update_anim, frames=real_num, interval=500, blit=False, repeat=True)
             _vid_name = os.path.join(self.save_path + '/', 'vid.webp')
             ani.save(filename=_vid_name, writer="pillow")
         
