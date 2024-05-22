@@ -38,7 +38,7 @@ class climber:
         self.current_reward = 0
         self.location_tracking = []
         
-        self.observation_radius = 10
+        #self.observation_radius = 10
         self.distance_to_goal = math.hypot(location[0] - self.torso.location[0], location[1] - self.torso.location[1])
 
     def raise_left_arm(self, angle):
