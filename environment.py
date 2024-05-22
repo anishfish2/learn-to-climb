@@ -18,7 +18,7 @@ is_ipython = 'inline' in matplotlib.get_backend()
 if is_ipython:
     from IPython import display
 
-ANGLE_CHANGE = math.radians(5)
+ANGLE_CHANGE = math.radians(15)
 
 class environment(gym.Env):
     def __init__(self, size = 50, holds = np.array([]), save_path = "", agent_energy = 500):
@@ -198,8 +198,7 @@ class environment(gym.Env):
         if save:
             csv_dict = {}
 
-            # csv_dict["Location X"] = [i[0] for i in self.agent.torso.location_tracking]
-            # csv_dict["Location Y"] = [i[1] for i in self.agent.torso.location_tracking]
+
             csv_dict["Left Arm Location X"] = [i[0] for i in self.agent.torso.left_arm.location_tracking]
             csv_dict["Left Arm Location Y"] = [i[1] for i in self.agent.torso.left_arm.location_tracking]
             csv_dict["Right Arm Location X"] = [i[0] for i in self.agent.torso.right_arm.location_tracking]
@@ -230,25 +229,9 @@ class environment(gym.Env):
         
     def get_observation(self):
 
-        # sensor_array = np.array([0] * 8)
-
-        # for i, obj in enumerate(self.holds):
-        #     hold_x, hold_y = obj
-
-        #     angle_diff = math.atan2(hold_y - self.agent.torso.location[1], hold_x - self.agent.torso.location[0])
-
-        #     distance =  math.hypot(hold_x - self.agent.torso.location[0], hold_y - self.agent.torso.location[1])
-
-        #     if distance <= self.agent.observation_radius:
-        #         sensor_index = int(angle_diff // (math.pi / 4))
-
-        #         # if sensor_array[sensor_index] == 0 or distance < sensor_array[sensor_index]:
-        #         #     sensor_array[sensor_index] = distance
-
-        #         sensor_array[sensor_index] += 1
-
         state_of_env = np.zeros(self.size * self.size)
         state_of_env[int(self.agent.torso.location[0] + .5) + self.size * int(self.agent.torso.location[1] + .5)] = 1
+
         if self.agent.torso.left_arm.holding:
             state_of_env[int(self.agent.torso.left_arm.location[0] + .5) + self.size * int(self.agent.torso.left_arm.location[1] + .5)] = 2
         else:
@@ -267,14 +250,13 @@ class environment(gym.Env):
                 print(state_of_env[j + self.size * i], end = " ")
        
         return state_of_env
-        # return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding], sensor_array))
-        # return np.concatenate((self.agent.torso.location, self.agent.torso.left_arm.location, self.agent.torso.right_arm.location, [self.agent.torso.left_arm.holding], [self.agent.torso.right_arm.holding]))
+ 
 
 if __name__ == "__main__":
     env = environment(15, [], "testing_environment/")
     env.set_size(15)
     env.add_hold(np.asarray((14, 10)))
-    env.render_run()
+    env.render_run(show_result=True)
     env.step(7)
     env.step(0)
     env.step(0)
