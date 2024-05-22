@@ -24,9 +24,9 @@ BATCH_SIZE = 128
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.01
-EPS_DECAY = 5000
+EPS_DECAY = 1000
 TAU = 0.005
-LR = 1e-4
+LR = 1e-3
 
 
 def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_energy = 500):
@@ -72,10 +72,12 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
 
     env = environment(size, [], 'saves/' + filename, agent_energy)
 
-    for i in range(0, 96, 3):
-        env.add_hold(np.asarray((i, i)))
-        # env.add_hold(np.asarray((i+4, i)))
-        # env.add_hold(np.asarray((i, i+4)))
+    env.add_hold(np.asarray((45, 50)))
+    env.add_hold(np.asarray((55, 50)))
+    for i in range(0, 96, 5):
+        #env.add_hold(np.asarray((i, i)))
+        env.add_hold(np.asarray((i+3, i)))
+        env.add_hold(np.asarray((i, i+3)))
 
 
     state = env.reset()
@@ -172,6 +174,7 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
     for i_episode in tqdm(range(num_episodes)):
         if not verbose:
             print("Episode: ", i_episode)
+        
         state = env.reset()
         state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         for t in count():
@@ -208,7 +211,8 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
             if not verbose:
                 if i_episode == num_episodes - 1:
                     plot_state(False, False)
-                
+            if env.agent.distance_to_goal < 3:
+                break
     plot_state(True, True)
 
     print('Complete')

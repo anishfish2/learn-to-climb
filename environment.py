@@ -98,8 +98,10 @@ class environment(gym.Env):
 
         self.agent.current_reward = reward
 
-        if np.linalg.norm(new_torso_location - previous_torso_location) == 0: 
-            self.agent.energy -= 3
+        # if np.linalg.norm(new_torso_location - previous_torso_location) > 0: 
+        #     self.agent.energy += 1
+        # if previous_distance > new_distance:
+        #     self.agent.energy += 2
         self.agent.energy -= 1
 
         done = False
@@ -123,7 +125,7 @@ class environment(gym.Env):
     def update_anim(self, frame):
         self.ax.clear()
         i = self.animation_step % self.num_step
-        self.ax.set_title((f"Step {i}, Energy {self.energy_tracking[i]}, Reward {round(self.reward_tracking[i], 4)}, Left {self.holding_tracking[i][0]}, Right {self.holding_tracking[i][1]}, Action {self.action_tracking[i]}, Sensor {self.observation_tracking[i]}"), wrap = True)
+        self.ax.set_title((f"Step {i}, Energy {self.energy_tracking[i]}, Reward {round(self.reward_tracking[i], 4)}, Left {self.holding_tracking[i][0]}, Right {self.holding_tracking[i][1]}, Action {self.action_tracking[i]}"), wrap = True)
 
         if len(self.holds) > 0:
             self.ax.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')

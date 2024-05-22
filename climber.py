@@ -28,7 +28,7 @@ class arm(body_part):
     
     def grab(self, holds = []):
         for hold in holds:
-            if np.linalg.norm(self.location - hold) < 1:
+            if np.linalg.norm(self.location - hold) < 2:
                 self.holding = True
 
 class climber:
