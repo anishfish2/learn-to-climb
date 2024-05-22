@@ -57,10 +57,7 @@ class environment(gym.Env):
     def step(self, action):
         previous_torso_location = self.agent.torso.location
         if action == 0:
-            print("Left Arm Position Before", self.agent.torso.left_arm.location)
-
             self.agent.raise_left_arm(ANGLE_CHANGE)
-            print("Left Arm Position After", self.agent.torso.left_arm.location)
             self.action_tracking.append("Raise Left Arm")
 
         elif action == 1:
@@ -95,16 +92,12 @@ class environment(gym.Env):
         new_distance = math.hypot(self.size - new_torso_location[0], self.size - new_torso_location[1])
         previous_distance = math.hypot(self.size - previous_torso_location[0], self.size - previous_torso_location[1])
 
-        #reward = 1 if previous_distance - new_distance > 0 else 0
         reward = previous_distance - new_distance
         self.agent.distance_to_goal = new_distance
 
         self.agent.current_reward = reward
 
-        # if np.linalg.norm(new_torso_location - previous_torso_location) > 0: 
-        #     self.agent.energy += 1
-        # if previous_distance > new_distance:
-        #     self.agent.energy += 2
+
         self.agent.energy -= 1
 
         done = False
@@ -134,15 +127,9 @@ class environment(gym.Env):
             self.ax.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
 
         self.ax.plot(self.agent.torso.location_tracking[i][0], self.agent.torso.location_tracking[i][1], 'go')
-        # radius_circle = matplotlib.patches.Circle((self.agent.torso.location_tracking[i][0], self.agent.torso.location_tracking[i][1]), self.agent.observation_radius, fill=False, color='blue')
-        # self.ax.add_patch(radius_circle)     
+   
         self.ax.plot([self.agent.torso.location_tracking[i][0], self.agent.torso.left_arm.location_tracking[i][0]], [self.agent.torso.location_tracking[i][1], self.agent.torso.left_arm.location_tracking[i][1]], linestyle = 'solid')
         self.ax.plot([self.agent.torso.location_tracking[i][0], self.agent.torso.right_arm.location_tracking[i][0]], [self.agent.torso.location_tracking[i][1], self.agent.torso.right_arm.location_tracking[i][1]], linestyle = 'solid')
-
-        # for j in range(8):
-        #     x = self.agent.torso.location_tracking[i][0] + self.agent.observation_radius * np.cos(j * math.pi / 4)
-        #     y = self.agent.torso.location_tracking[i][1] + self.agent.observation_radius * np.sin(j * math.pi / 4)
-        #     self.ax.plot([self.agent.torso.location_tracking[i][0], x], [self.agent.torso.location_tracking[i][1], y], linestyle = 'dotted')
 
         self.ax.plot(self.agent.torso.left_arm.location_tracking[i][0], self.agent.torso.left_arm.location_tracking[i][1], 'bo')
         self.ax.plot(self.agent.torso.right_arm.location_tracking[i][0], self.agent.torso.right_arm.location_tracking[i][1], 'yo')
@@ -158,7 +145,6 @@ class environment(gym.Env):
             plt.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
 
         plt.plot(self.agent.torso.location[0], self.agent.torso.location[1], 'go')
-        # plt.Circle((self.agent.torso.location[0], self.agent.torso.location[1]), self.agent.observation_radius, fill=False, color='blue')
         plt.plot([self.agent.torso.location[0], self.agent.torso.left_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.left_arm.location[1]], linestyle = 'solid')
         plt.plot([self.agent.torso.location[0], self.agent.torso.right_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.right_arm.location[1]], linestyle = 'solid')
         plt.plot(self.agent.torso.left_arm.location[0], self.agent.torso.left_arm.location[1], 'bo')
@@ -176,7 +162,6 @@ class environment(gym.Env):
             plt.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
 
         plt.plot(self.agent.torso.location[0], self.agent.torso.location[1], 'go')
-        # plt.Circle((self.agent.torso.location[0], self.agent.torso.location[1]), self.agent.observation_radius, fill=False, color='blue')
         plt.plot([self.agent.torso.location[0], self.agent.torso.left_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.left_arm.location[1]], linestyle = 'solid')
         plt.plot([self.agent.torso.location[0], self.agent.torso.right_arm.location[0]], [self.agent.torso.location[1], self.agent.torso.right_arm.location[1]], linestyle = 'solid')
         plt.plot(self.agent.torso.left_arm.location[0], self.agent.torso.left_arm.location[1], 'bo')
@@ -186,7 +171,7 @@ class environment(gym.Env):
         plt.ylim(0, self.size)
 
         plt.title(f'Current Reward: {round(self.agent.current_reward, 4)} Energy: {self.agent.energy}')
-        plt.pause(0.001)
+        #plt.pause(5)
 
         if is_ipython:
             if not show_result:
@@ -228,9 +213,11 @@ class environment(gym.Env):
 
         
     def get_observation(self):
-
+        
         state_of_env = np.zeros(self.size * self.size)
         state_of_env[int(self.agent.torso.location[0] + .5) + self.size * int(self.agent.torso.location[1] + .5)] = 1
+
+        # Discretize observation space
 
         if self.agent.torso.left_arm.holding:
             state_of_env[int(self.agent.torso.left_arm.location[0] + .5) + self.size * int(self.agent.torso.left_arm.location[1] + .5)] = 2
@@ -244,17 +231,14 @@ class environment(gym.Env):
         for hold in self.holds:
             state_of_env[hold[0] + self.size * hold[1]] = 9
 
-        for i in range(self.size):
-            print()
-            for j in range(self.size):
-                print(state_of_env[j + self.size * i], end = " ")
-       
+        self.observation_tracking.append(state_of_env)
+
         return state_of_env
  
 
 if __name__ == "__main__":
     env = environment(15, [], "testing_environment/")
-    env.set_size(15)
+    env.set_size(100)
     env.add_hold(np.asarray((14, 10)))
     env.render_run(show_result=True)
     env.step(7)
