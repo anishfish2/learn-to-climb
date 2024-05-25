@@ -18,7 +18,7 @@ is_ipython = 'inline' in matplotlib.get_backend()
 if is_ipython:
     from IPython import display
 
-ANGLE_CHANGE = math.radians(15)
+ANGLE_CHANGE = math.radians(10)
 
 class environment(gym.Env):
     def __init__(self, size = 50, holds = np.array([]), save_path = "", agent_energy = 500):
@@ -214,10 +214,11 @@ class environment(gym.Env):
         
     def get_observation(self):
         
-        state_of_env = np.zeros(self.size * self.size)
-        state_of_env[int(self.agent.torso.location[0] + .5) + self.size * int(self.agent.torso.location[1] + .5)] = 1
+       # Discretize observation space
 
-        # Discretize observation space
+        state_of_env = np.zeros(self.size * self.size)
+
+        state_of_env[int(self.agent.torso.location[0] + .5) + self.size * int(self.agent.torso.location[1] + .5)] = 1
 
         if self.agent.torso.left_arm.holding:
             state_of_env[int(self.agent.torso.left_arm.location[0] + .5) + self.size * int(self.agent.torso.left_arm.location[1] + .5)] = 2
@@ -227,9 +228,23 @@ class environment(gym.Env):
             state_of_env[int(self.agent.torso.right_arm.location[0] + .5) + self.size * int(self.agent.torso.right_arm.location[1] + .5)] = 4
         else:
             state_of_env[int(self.agent.torso.right_arm.location[0] + .5) + self.size * int(self.agent.torso.right_arm.location[1] + .5)] = 5
-        
+
         for hold in self.holds:
-            state_of_env[hold[0] + self.size * hold[1]] = 9
+            if state_of_env[hold[0] + self.size * hold[1]] == 1:
+                state_of_env[hold[0] + self.size * hold[1]] = 9
+            elif state_of_env[hold[0] + self.size * hold[1]] == 2:
+                state_of_env[hold[0] + self.size * hold[1]] = 10
+            elif state_of_env[hold[0] + self.size * hold[1]] == 3:
+                state_of_env[hold[0] + self.size * hold[1]] = 11
+            elif state_of_env[hold[0] + self.size * hold[1]] == 4:
+                state_of_env[hold[0] + self.size * hold[1]] = 12
+            elif state_of_env[hold[0] + self.size * hold[1]] == 5:
+                state_of_env[hold[0] + self.size * hold[1]] = 13 
+            else:
+                state_of_env[hold[0] + self.size * hold[1]] = 14
+
+       
+        
 
         self.observation_tracking.append(state_of_env)
 
