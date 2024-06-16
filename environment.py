@@ -155,9 +155,10 @@ class environment(gym.Env):
         plt.show()
 
     def render_run(self, save = False, show_result = False):
-        plt.clf()
+        
         plt.figure(2)
-
+        plt.clf()
+        
         if len(self.holds) > 0:
             plt.plot([point[0] for point in self.holds], [point[1] for point in self.holds], 'ro')
 
@@ -216,35 +217,32 @@ class environment(gym.Env):
         
        # Discretize observation space
 
-        state_of_env = np.zeros(self.size * self.size)
+        state_of_env = np.zeros(shape=(self.size,self.size))
 
-        state_of_env[int(self.agent.torso.location[0] + .5) + self.size * int(self.agent.torso.location[1] + .5)] = 1
+        state_of_env[int(self.agent.torso.location[0] + .5)][int(self.agent.torso.location[1] + .5)] = 1
 
         if self.agent.torso.left_arm.holding:
-            state_of_env[int(self.agent.torso.left_arm.location[0] + .5) + self.size * int(self.agent.torso.left_arm.location[1] + .5)] = 2
+            state_of_env[int(self.agent.torso.left_arm.location[0] + .5)][int(self.agent.torso.left_arm.location[1] + .5)] = 2
         else:
-            state_of_env[int(self.agent.torso.left_arm.location[0] + .5) + self.size * int(self.agent.torso.left_arm.location[1] + .5)] = 3
+            state_of_env[int(self.agent.torso.left_arm.location[0] + .5)][int(self.agent.torso.left_arm.location[1] + .5)] = 3
         if self.agent.torso.right_arm.holding:
-            state_of_env[int(self.agent.torso.right_arm.location[0] + .5) + self.size * int(self.agent.torso.right_arm.location[1] + .5)] = 4
+            state_of_env[int(self.agent.torso.right_arm.location[0] + .5)][int(self.agent.torso.right_arm.location[1] + .5)] = 4
         else:
-            state_of_env[int(self.agent.torso.right_arm.location[0] + .5) + self.size * int(self.agent.torso.right_arm.location[1] + .5)] = 5
+            state_of_env[int(self.agent.torso.right_arm.location[0] + .5)][int(self.agent.torso.right_arm.location[1] + .5)] = 5
 
         for hold in self.holds:
-            if state_of_env[hold[0] + self.size * hold[1]] == 1:
-                state_of_env[hold[0] + self.size * hold[1]] = 9
-            elif state_of_env[hold[0] + self.size * hold[1]] == 2:
-                state_of_env[hold[0] + self.size * hold[1]] = 10
-            elif state_of_env[hold[0] + self.size * hold[1]] == 3:
-                state_of_env[hold[0] + self.size * hold[1]] = 11
-            elif state_of_env[hold[0] + self.size * hold[1]] == 4:
-                state_of_env[hold[0] + self.size * hold[1]] = 12
-            elif state_of_env[hold[0] + self.size * hold[1]] == 5:
-                state_of_env[hold[0] + self.size * hold[1]] = 13 
+            if state_of_env[hold[0]][hold[1]] == 1:
+                state_of_env[hold[0]][hold[1]] = 9
+            elif state_of_env[hold[0]][hold[1]] == 2:
+                state_of_env[hold[0]][hold[1]] = 10
+            elif state_of_env[hold[0]][hold[1]] == 3:
+                state_of_env[hold[0]][hold[1]] = 11
+            elif state_of_env[hold[0]][hold[1]] == 4:
+                state_of_env[hold[0]][hold[1]] = 12
+            elif state_of_env[hold[0]][hold[1]] == 5:
+                state_of_env[hold[0]][hold[1]] = 13 
             else:
-                state_of_env[hold[0] + self.size * hold[1]] = 14
-
-       
-        
+                state_of_env[hold[0]][hold[1]] = 14
 
         self.observation_tracking.append(state_of_env)
 
