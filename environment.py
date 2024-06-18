@@ -21,7 +21,7 @@ if is_ipython:
 ANGLE_CHANGE = math.radians(10)
 
 class environment(gym.Env):
-    def __init__(self, size = 50, holds = np.array([]), save_path = "", agent_energy = 500):
+    def __init__(self, size = 50, holds = np.array([]), save_path = "", agent_energy = 500, goal = None, agent_starting_location = None):
         self.size = size
         self.holds = holds
         self.agent_starting_energy = agent_energy
@@ -35,9 +35,12 @@ class environment(gym.Env):
         self.action_tracking = []
         self.reward_tracking = []
         self.energy_tracking = []
+        self.goal = goal if goal is not None else np.asarray((self.size, self.size))
+        self.agent_starting_location = agent_starting_location if agent_starting_location is not None else np.asarray((self.size / 2, self.size / 2))
 
     def reset_agent(self):
         self.agent = climber(agent_energy = self.agent_starting_energy)
+        self.agent.best_distance = None 
 
     def add_hold(self, holds):
         self.holds.append(holds)
@@ -89,15 +92,23 @@ class environment(gym.Env):
             self.action_tracking.append("Release Right Arm")
 
         new_torso_location = self.agent.torso.location
-        new_distance = math.hypot(self.size - new_torso_location[0], self.size - new_torso_location[1])
-        previous_distance = math.hypot(self.size - previous_torso_location[0], self.size - previous_torso_location[1])
-
-        reward = previous_distance - new_distance
-        self.agent.distance_to_goal = new_distance
-
+        new_distance = math.hypot(self.goal[0] - new_torso_location[0], self.goal[1] - new_torso_location[1])
+        previous_distance = math.hypot(self.goal[0] - previous_torso_location[0], self.goal[1] - previous_torso_location[1])
+        reward = 0
+        if self.agent.best_distance is None:
+            #reward = math.hypot(self.goal[0] - self.agent_starting_location[0], self.goal[1] - self.agent_starting_location[1]) - new_distance
+            self.agent.best_distance = new_distance
+            
+        # elif new_distance < self.agent.best_distance:
+        #     reward = self.agent.best_distance - new_distance
+        #     reward = 5
+        #     self.agent.best_distance = new_distance
+        
+        else:
+            if new_distance < previous_distance:
+                reward = 1
+            
         self.agent.current_reward = reward
-
-
         self.agent.energy -= 1
 
         done = False
@@ -217,32 +228,35 @@ class environment(gym.Env):
         
        # Discretize observation space
 
+       
+
         state_of_env = np.zeros(shape=(self.size,self.size))
 
-        state_of_env[int(self.agent.torso.location[0] + .5)][int(self.agent.torso.location[1] + .5)] = 1
+        state_of_env[-int(self.agent.torso.location[1] + .5)][int(self.agent.torso.location[0] + .5)] = 1
 
         if self.agent.torso.left_arm.holding:
-            state_of_env[int(self.agent.torso.left_arm.location[0] + .5)][int(self.agent.torso.left_arm.location[1] + .5)] = 2
+            state_of_env[-int(self.agent.torso.left_arm.location[1] + .5)][int(self.agent.torso.left_arm.location[0] + .5)] = 2
         else:
-            state_of_env[int(self.agent.torso.left_arm.location[0] + .5)][int(self.agent.torso.left_arm.location[1] + .5)] = 3
+            state_of_env[-int(self.agent.torso.left_arm.location[1] + .5)][int(self.agent.torso.left_arm.location[0] + .5)] = 3
         if self.agent.torso.right_arm.holding:
-            state_of_env[int(self.agent.torso.right_arm.location[0] + .5)][int(self.agent.torso.right_arm.location[1] + .5)] = 4
+            state_of_env[-int(self.agent.torso.right_arm.location[1] + .5)][int(self.agent.torso.right_arm.location[0] + .5)] = 4
         else:
-            state_of_env[int(self.agent.torso.right_arm.location[0] + .5)][int(self.agent.torso.right_arm.location[1] + .5)] = 5
+            state_of_env[-int(self.agent.torso.right_arm.location[1] + .5)][int(self.agent.torso.right_arm.location[0] + .5)] = 5
 
         for hold in self.holds:
-            if state_of_env[hold[0]][hold[1]] == 1:
-                state_of_env[hold[0]][hold[1]] = 9
-            elif state_of_env[hold[0]][hold[1]] == 2:
-                state_of_env[hold[0]][hold[1]] = 10
-            elif state_of_env[hold[0]][hold[1]] == 3:
-                state_of_env[hold[0]][hold[1]] = 11
-            elif state_of_env[hold[0]][hold[1]] == 4:
-                state_of_env[hold[0]][hold[1]] = 12
-            elif state_of_env[hold[0]][hold[1]] == 5:
-                state_of_env[hold[0]][hold[1]] = 13 
+            if state_of_env[-hold[1]][hold[0]] == 1:
+                state_of_env[-hold[1]][hold[0]] = 9
+            elif state_of_env[-hold[1]][hold[0]] == 2:
+                state_of_env[-hold[1]][hold[0]] = 10
+            elif state_of_env[-hold[1]][hold[0]] == 3:
+                state_of_env[-hold[1]][hold[0]] = 11
+            elif state_of_env[-hold[1]][hold[0]] == 4:
+                state_of_env[-hold[1]][hold[0]] = 12
+            elif state_of_env[-hold[1]][hold[0]] == 5:
+                state_of_env[-hold[1]][hold[0]] = 13 
             else:
-                state_of_env[hold[0]][hold[1]] = 14
+                state_of_env[-hold[1]][hold[0]] = 14
+
 
         self.observation_tracking.append(state_of_env)
 

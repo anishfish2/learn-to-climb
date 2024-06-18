@@ -32,16 +32,16 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
     plt.ion()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     env = environment(size, [], 'saves/' + filename, agent_energy)
 
     env.add_hold(np.asarray((45, 50)))
     env.add_hold(np.asarray((55, 50)))
-    for i in range(0, 96, 5):
-        #env.add_hold(np.asarray((i, i)))
-        env.add_hold(np.asarray((i+3, i)))
-        env.add_hold(np.asarray((i, i+3)))
-
+    for i in range(0, 98):
+        env.add_hold(np.asarray((i, i)))
+        env.add_hold(np.asarray((i+1, i)))
+        env.add_hold(np.asarray((i, i+1)))
+        env.add_hold(np.asarray((i+2, i)))
+        env.add_hold(np.asarray((i, i+2)))
 
     state = env.reset()
     n_actions = env.action_space.n
@@ -57,10 +57,8 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
 
     reward_tracking = []
 
-    if torch.cuda.is_available():
-        num_episodes = 600
-    else:
-        num_episodes = episodes
+
+    num_episodes = episodes
 
     for i_episode in tqdm(range(num_episodes)):
         if not verbose:
@@ -70,46 +68,32 @@ def run(filename = 'testing', episodes = 5, size = 100, verbose = True, agent_en
         state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         steps_done = 0
         for t in count():
-            print(t)
             action = select_action(env, state, policy_net, device, steps_done)
             steps_done += 1
             observation, reward, terminated, truncated, _ = env.step(action.item())
             reward = torch.tensor([reward], device=device)
-            done = terminated or truncated
 
             if terminated:
                 next_state = None
+                break
             else:
                 next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
 
             memory.push(state, action, next_state, reward)
 
             state = next_state
-
-            time_start = time.time()
             optimize_model(memory=memory, policy_net=policy_net, target_net=target_net, optimizer=optimizer, device=device)
-            time_end = time.time()
-            print('Time taken for optimization: ', time_end - time_start)
-            
             target_net_state_dict = target_net.state_dict()
             policy_net_state_dict = policy_net.state_dict()
             for key in policy_net_state_dict:
                 target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
             target_net.load_state_dict(target_net_state_dict)
-            print(reward)
+
             reward_tracking.append(reward)
+
             if verbose:
                 plot_rewards(show_result=True, reward_tracking=reward_tracking, filename=filename)
-
-            if done:
-                
-                break
-
-            if verbose:
                 plot_state(env, False, True)
-            if env.agent.distance_to_goal < 3:
-                break
-
 
     plot_state(env, True, True)
     print('Complete')

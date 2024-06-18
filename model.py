@@ -21,8 +21,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-BATCH_SIZE = 32
-GAMMA = 0.99
+BATCH_SIZE = 32 
+GAMMA = 0.25
 EPS_START = 0.9
 EPS_END = 0.01
 EPS_DECAY = 1000
@@ -34,8 +34,8 @@ class DQN(nn.Module):
     def __init__(self, env_size, n_actions):
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(32, 128, kernel_size=3, stride=1, padding=1)
+
 
         conv_output_size = self._get_conv_output_size(env_size)
 
@@ -46,14 +46,14 @@ class DQN(nn.Module):
         dummy_input = torch.zeros(1, 1, size, size)
         output = self.conv1(dummy_input)
         output = self.conv2(output)
-        output = self.conv3(output)
+        #output = self.conv3(output)
         return int(output.numel())
 
     def forward(self, x):
         x = torch.unsqueeze(x, 1)
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
+        #x = F.relu(self.conv3(x))
         x = x.view(x.shape[0], -1)  # Flatten the tensor
         x = F.relu(self.layer1(x))
         return self.layer4(x)

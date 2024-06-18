@@ -27,7 +27,6 @@ if is_ipython:
 plt.ion()
 
 def plot_rewards(show_result=False, reward_tracking=[], filename='testing'):
-        print('plotting rewards', len(reward_tracking))
         plt.figure(1)
         reward_t = torch.tensor(reward_tracking, dtype=torch.float)
         if show_result:
@@ -37,7 +36,7 @@ def plot_rewards(show_result=False, reward_tracking=[], filename='testing'):
             plt.title('Training...')
         plt.xlabel('Episode')
         plt.ylabel('Reward')
-        plt.plot(reward_t.numpy())
+        plt.plot(reward_t.numpy(), color='gray')
         if len(reward_t) >= 100:
             means = reward_t.unfold(0, 100, 1).mean(1).view(-1)
             means = torch.cat((torch.zeros(99), means))
